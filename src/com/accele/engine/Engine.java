@@ -1,6 +1,5 @@
 package com.accele.engine;
 
-import java.awt.Color;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -175,21 +174,8 @@ public final class Engine {
 				// Render
 				GLUtils.clear(internalProperties.getGameType() == 2 ? false : true);
 				
-				//target = scale;
-				
-				//shader.bind();
-				//shader.setUniform("sampler", 0);
-				//shader.setUniform("projection", camera.getProjection().mul(target));
-				//graphics.drawModel(model, texture);
-				//shader.unbind();
-				
-				//for (int i = 0; i < 8; i++)
-					//for (int j = 0; j < 4; j++)
-						//graphics.drawTile(tile, Utils.transformationMatrix(Utils.toTilePosition(new Vector3f(i, j, 0)), new Vector3f(0, 0, 0), new Vector3f(1, 1, 0)), shader, scale);
-				//graphics.drawTile(tile2, Utils.transformationMatrix(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), new Vector3f(16, 16, 16)), shader, scale);
 				world.onRender(graphics);
 				player.onRender(graphics);
-				//graphics.drawTileMap(tiles, 16, 16, shader);
 				
 				GLUtils.swapBuffers(window);
 			}
