@@ -1,4 +1,9 @@
-package com.accele.engine;
+package com.accele.engine.state;
+
+import com.accele.engine.Engine;
+import com.accele.engine.Indexable;
+import com.accele.engine.Renderable;
+import com.accele.engine.Tickable;
 
 public abstract class State implements Indexable, Tickable, Renderable {
 

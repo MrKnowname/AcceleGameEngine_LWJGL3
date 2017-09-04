@@ -1,14 +1,74 @@
 package com.accele.engine.util;
 
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL13.*;
-import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL11.GL_BLEND;
+import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
+import static org.lwjgl.opengl.GL11.GL_RGBA;
+import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.GL_TRUE;
+import static org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE;
+import static org.lwjgl.opengl.GL11.glBindTexture;
+import static org.lwjgl.opengl.GL11.glBlendFunc;
+import static org.lwjgl.opengl.GL11.glClear;
+import static org.lwjgl.opengl.GL11.glClearColor;
+import static org.lwjgl.opengl.GL11.glDeleteTextures;
+import static org.lwjgl.opengl.GL11.glDisable;
+import static org.lwjgl.opengl.GL11.glDisableClientState;
+import static org.lwjgl.opengl.GL11.glEnable;
+import static org.lwjgl.opengl.GL11.glEnableClientState;
+import static org.lwjgl.opengl.GL11.glGenTextures;
+import static org.lwjgl.opengl.GL11.glTexImage2D;
+import static org.lwjgl.opengl.GL11.glTexParameterf;
+import static org.lwjgl.opengl.GL13.glActiveTexture;
+import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
+import static org.lwjgl.opengl.GL15.GL_ELEMENT_ARRAY_BUFFER;
+import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
+import static org.lwjgl.opengl.GL15.glBindBuffer;
+import static org.lwjgl.opengl.GL15.glBufferData;
+import static org.lwjgl.opengl.GL15.glDeleteBuffers;
+import static org.lwjgl.opengl.GL15.glGenBuffers;
+import static org.lwjgl.opengl.GL20.GL_COMPILE_STATUS;
+import static org.lwjgl.opengl.GL20.GL_FRAGMENT_SHADER;
+import static org.lwjgl.opengl.GL20.GL_LINK_STATUS;
+import static org.lwjgl.opengl.GL20.GL_VALIDATE_STATUS;
+import static org.lwjgl.opengl.GL20.GL_VERTEX_SHADER;
+import static org.lwjgl.opengl.GL20.glAttachShader;
+import static org.lwjgl.opengl.GL20.glBindAttribLocation;
+import static org.lwjgl.opengl.GL20.glCompileShader;
+import static org.lwjgl.opengl.GL20.glCreateProgram;
+import static org.lwjgl.opengl.GL20.glCreateShader;
+import static org.lwjgl.opengl.GL20.glDeleteProgram;
+import static org.lwjgl.opengl.GL20.glDeleteShader;
+import static org.lwjgl.opengl.GL20.glDetachShader;
+import static org.lwjgl.opengl.GL20.glGetProgramInfoLog;
+import static org.lwjgl.opengl.GL20.glGetProgrami;
+import static org.lwjgl.opengl.GL20.glGetShaderInfoLog;
+import static org.lwjgl.opengl.GL20.glGetShaderi;
+import static org.lwjgl.opengl.GL20.glGetUniformLocation;
+import static org.lwjgl.opengl.GL20.glLinkProgram;
+import static org.lwjgl.opengl.GL20.glShaderSource;
+import static org.lwjgl.opengl.GL20.glUniform1f;
+import static org.lwjgl.opengl.GL20.glUniform1i;
+import static org.lwjgl.opengl.GL20.glUniform2f;
+import static org.lwjgl.opengl.GL20.glUniform3f;
+import static org.lwjgl.opengl.GL20.glUniform4f;
+import static org.lwjgl.opengl.GL20.glUniformMatrix4fv;
+import static org.lwjgl.opengl.GL20.glUseProgram;
+import static org.lwjgl.opengl.GL20.glValidateProgram;
+import static org.lwjgl.opengl.GL41.GL_PROGRAM_SEPARABLE;
+import static org.lwjgl.opengl.GL41.glBindProgramPipeline;
+import static org.lwjgl.opengl.GL41.glDeleteProgramPipelines;
+import static org.lwjgl.opengl.GL41.glGenProgramPipelines;
+import static org.lwjgl.opengl.GL41.glProgramParameteri;
+import static org.lwjgl.opengl.GL41.glUseProgramStages;
 
 import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.List;
 
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
@@ -36,7 +96,7 @@ public final class GLUtils {
 		for (Pair<Integer, Integer> param : params)
 			glTexParameterf(GL_TEXTURE_2D, param.getFirst(), param.getSecond());
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-		glBindTexture(GL_TEXTURE_2D, 0);
+		glBindTexture(GL_TEXTURE_2D, NULL);
 		return textureId;
 	}
 	
@@ -45,7 +105,7 @@ public final class GLUtils {
 	}
 	
 	public static void unbindTexture() {
-		glBindTexture(GL_TEXTURE_2D, 0);
+		glBindTexture(GL_TEXTURE_2D, NULL);
 	}
 	
 	public static void deleteTexture(int textureId) {
@@ -80,7 +140,7 @@ public final class GLUtils {
 	
 	public static void runWindow(long window) {
 		GLFW.glfwShowWindow(window);
-		GL.createCapabilities();
+		//GL.createCapabilities();
 	}
 	
 	public static void enableAlphaBlending() {
@@ -219,6 +279,53 @@ public final class GLUtils {
 		return new Pair<>(programId, new Pair<>(vertexShaderId, fragmentShaderId));
 	}
 	
+	public static int createShader(String shaderRegistryId, Resource source, int shaderType) {
+		int id = glCreateShader(shaderType);
+		glShaderSource(id, source.get().toString());
+		glCompileShader(id);
+		
+		if (glGetShaderi(id, GL_COMPILE_STATUS) != 1) {
+			System.err.println("Error loading shader " + shaderRegistryId + ", details:\n" + glGetShaderInfoLog(id));
+			return NULL;
+		}
+		
+		return id;
+	}
+	
+	public static int createShaderProgram(int[] shaderIds, boolean preserveShaders, boolean separable) {
+		int id = glCreateProgram();
+		for (int shaderId : shaderIds)
+			glAttachShader(id, shaderId);
+		
+		if (separable)
+			glProgramParameteri(id, GL_PROGRAM_SEPARABLE, GL_TRUE);
+		
+		glLinkProgram(id);
+		if (glGetProgrami(id, GL_LINK_STATUS) != 1) {
+			System.err.println("Error linking shaders, details:\n" + glGetProgramInfoLog(id));
+			return NULL;
+		}
+		
+		glValidateProgram(id);
+		if (glGetProgrami(id, GL_VALIDATE_STATUS) != 1) {
+			System.err.println("Error validating shaders, details:\n" + glGetProgramInfoLog(id));
+			return NULL;
+		}
+		
+		if (!preserveShaders) {
+			for (int shaderId : shaderIds) {
+				glDetachShader(id, shaderId);
+				glDeleteShader(shaderId);
+			}
+		}
+		
+		return id;
+	}
+	
+	public static void deleteShaderProgram(int programId) {
+		glDeleteProgram(programId);
+	}
+	
 	public static void bindShader(int id) {
 		glUseProgram(id);
 	}
@@ -311,6 +418,65 @@ public final class GLUtils {
 		glDeleteShader(vertexShaderId);
 		glDeleteShader(fragmentShaderId);
 		glDeleteProgram(programId);
+	}
+
+	public static int getUniformLocation(int programId, String name) {
+		return glGetUniformLocation(programId, name);
+	}
+	
+	public static void setUniformInt(int programId, int uniformLoc, int val) {
+		glUniform1i(uniformLoc, val);
+	}
+	
+	public static void setUniformFloat(int programId, int uniformLoc, float val) {
+		glUniform1f(uniformLoc, val);
+	}
+	
+	public static void setUniformVector2f(int programId, int uniformLoc, Vector2f val) {
+		glUniform2f(uniformLoc, val.x, val.y);
+	}
+	
+	public static void setUniformVector3f(int programId, int uniformLoc, Vector3f val) {
+		glUniform3f(uniformLoc, val.x, val.y, val.z);
+	}
+
+	public static void setUniformVector4f(int programId, int uniformLoc, Vector4f val) {
+		glUniform4f(uniformLoc, val.x, val.y, val.z, val.w);
+	}
+
+	public static void setUniformMatrix4f(int programId, int uniformLoc, Matrix4f val) {
+		FloatBuffer buffer = BufferUtils.createFloatBuffer(16);
+		val.get(buffer);
+		glUniformMatrix4fv(uniformLoc, false, buffer);
+	}
+
+	public static int createShaderProgramPipeline(List<Pair<Integer, Integer>> shaderProgramData) {
+		int id = glGenProgramPipelines();
+		
+		for (Pair<Integer, Integer> data : shaderProgramData)
+			glUseProgramStages(id, data.getSecond(), data.getFirst());
+		
+		return id;
+	}
+	
+	public static void bindShaderProgramPipeline(int id) {
+		glBindProgramPipeline(id);
+	}
+	
+	public static void unbindShaderProgramPipeline() {
+		glBindProgramPipeline(NULL);
+	}
+	
+	public static void bindShaderProgramToPipeline(int shaderProgramPipelineId, int shaderProgramId, int shaderTypes) {
+		glUseProgramStages(shaderProgramPipelineId, shaderTypes, shaderProgramId);
+	}
+
+	public static void removeShaderProgramPipeline(int id) {
+		glDeleteProgramPipelines(id);
+	}
+
+	public static void initOpenGL() {
+		GL.createCapabilities();
 	}
 	
 }

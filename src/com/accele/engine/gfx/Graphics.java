@@ -19,6 +19,7 @@ import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 
 import com.accele.engine.Engine;
+import com.accele.engine.util.ACLEngineAccessProvider;
 import com.accele.engine.util.Utils;
 
 public class Graphics {
@@ -26,8 +27,11 @@ public class Graphics {
 	private Engine engine;
 	private Model defaultTileModel;
 	
-	public Graphics(Engine engine) {
+	public Graphics(Engine engine, Object key) {
 		this.engine = engine;
+		
+		if (!ACLEngineAccessProvider.canAccess(key))
+			throw ACLEngineAccessProvider.accessError(this.getClass().getSimpleName());
 	}
 	
 	public void init() {

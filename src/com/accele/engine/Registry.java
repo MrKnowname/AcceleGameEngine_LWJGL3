@@ -8,6 +8,7 @@ import com.accele.engine.gfx.Shader;
 import com.accele.engine.gfx.Texture;
 import com.accele.engine.io.Input;
 import com.accele.engine.property.Property;
+import com.accele.engine.state.State;
 
 public final class Registry {
 
@@ -18,6 +19,7 @@ public final class Registry {
 	private Map<String, Texture> textures;
 	private Map<String, Input> inputs;
 	private Map<String, Property> properties;
+	private Map<String, SubRegistry> subRegistries;
 	
 	protected Registry() {
 		this.entries = new HashMap<>();
@@ -27,6 +29,7 @@ public final class Registry {
 		this.textures = new HashMap<>();
 		this.inputs = new HashMap<>();
 		this.properties = new HashMap<>();
+		this.subRegistries = new HashMap<>();
 	}
 	
 	private boolean register(Indexable entry) {
@@ -90,6 +93,15 @@ public final class Registry {
 		properties.put(property.getLocalizedId(), property);
 	}
 	
+	public <T extends SubRegistry> void register(T subRegistry) {
+		if (!register((Indexable) subRegistry)) {
+			System.err.println("Could not register sub-registry \"" + subRegistry.getRegistryId() + "\".");
+			return;
+		}
+		
+		subRegistries.put(subRegistry.getLocalizedId(), subRegistry);
+	}
+	
 	public Indexable get(String registryId) {
 		return entries.get(registryId);
 	}
@@ -118,6 +130,10 @@ public final class Registry {
 		return properties.get(localizedId);
 	}
 	
+	public SubRegistry getSubRegistry(String localizedId) {
+		return subRegistries.get(localizedId);
+	}
+	
 	public Indexable[] getAll() {
 		return entries.values().toArray(new Indexable[entries.size()]);
 	}
@@ -144,6 +160,10 @@ public final class Registry {
 	
 	public Property[] getProperties() {
 		return properties.values().toArray(new Property[properties.size()]);
+	}
+	
+	public SubRegistry[] getSubRegistries() {
+		return subRegistries.values().toArray(new SubRegistry[subRegistries.size()]);
 	}
 	
 }

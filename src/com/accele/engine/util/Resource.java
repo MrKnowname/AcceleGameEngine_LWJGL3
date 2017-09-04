@@ -10,6 +10,11 @@ public class Resource {
 		this.value = loader.load(path);
 	}
 	
+	public Resource(Object value) {
+		this.path = ":internal:";
+		this.value = value;
+	}
+	
 	public String getPath() {
 		return path;
 	}
