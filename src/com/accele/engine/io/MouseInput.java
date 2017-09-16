@@ -22,7 +22,7 @@ public class MouseInput extends Input {
 		return isButtonDown(button) && !buttons[button];
 	}
 	
-	public boolean isKeyReleased(int button) {
+	public boolean isButtonReleased(int button) {
 		return !isButtonDown(button) && buttons[button];
 	}
 

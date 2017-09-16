@@ -134,6 +134,13 @@ public final class Registry {
 		return subRegistries.get(localizedId);
 	}
 	
+	public <T extends SubRegistry> T getSubRegistry(String localizedId, Class<T> subRegistry) {
+		SubRegistry result = subRegistries.get(localizedId);
+		if (!result.getClass().equals(subRegistry))
+			return null;
+		return subRegistry.cast(result);
+	}
+	
 	public Indexable[] getAll() {
 		return entries.values().toArray(new Indexable[entries.size()]);
 	}

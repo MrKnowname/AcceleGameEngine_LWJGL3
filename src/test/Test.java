@@ -157,8 +157,7 @@ public class Test {
 		
 		engine.getRegistry().register(new GameRegistry());
 		engine.getRegistry().getSubRegistry("game").register(new Tool("acl.test.tool.t1", "t1"));
-		GameRegistry gameRegistry = (GameRegistry) engine.getRegistry().getSubRegistry("game");
-		System.out.println(gameRegistry.getTool("t1").getRegistryId());
+		System.out.println(engine.getRegistry().getSubRegistry("game", GameRegistry.class).getTool("t1").getRegistryId());
 		engine.getInternalProperties().setTitle("Test Application with ACLEngine v" + engine.getInternalProperties().getVersion());
 		
 		Transformation trans = new Transformation().rotate(0, 0, (float) Math.toRadians(180));
